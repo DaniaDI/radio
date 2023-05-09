@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Radio Stations</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
+<body>
+    <h1>Radio Stations</h1>
+    <div id="radioList"></div>
+
+    <script>
+        // Set up API endpoint
+        const url = 'http://de1.api.radio-browser.info/json/stations/bycountry/palestine';
+        //http://de1.api.radio-browser.info/xml/stations/bycountry/austria
+
+        // Keep track of currently playing audio and current station
+        let currentAudio = null;
+        let currentStation = null;
+
+        // Make API request
+        // $.getJSON(url, function (data) {
+        //     // Create initial station element
+        //     currentStation = createStationElement(data[0]);
+        //     $('#radioList').append(currentStation);
+
+        // });
+
+        $.ajax(
+            {
+                contentType: 'application/json',
+                method: 'POST',
+                url: url,
+                data: {
+                    countrycode: 'IL'
+                },
+                success: function (data) {
+                    console.log(data)
+                    // Create initial station element
+                    currentStation = createStationElement(data[0]);
+                    $('#radioList').append(currentStation);
+                }
+            }
+        );
+
+        // Function to create station element
+        function createStationElement(station) {
+            const name = station.name;
+            const url = station.url;
+            const element = $(`
+            <div>
+              <span>${name}</span>
+              <button onclick="togglePlay(this, '${url}')"><i class="fa fa-play"></i></button>
+               <button onclick="nextStation()"><i class="fa fa-step-forward"></i></button>
+               <button onclick="prevStation()"><i class="fa fa-step-backward"></i></button>
+            </div>
+          `);
+            return element;
+        }
+
+        // Function to toggle play/pause and change icon
+        function togglePlay(button, url) {
+            // Get audio element for this URL or create a new one
+            let audio = currentAudio;
+            if (!audio || audio.src !== url) {
+                audio = new Audio(url);
+                currentAudio = audio;
+            }
+
+            // Toggle play/pause
+            if (audio.paused) {
+                // Stop any currently playing audio
+                if (currentStation) {
+                    currentStation.find('button').html('<i class="fa fa-play"></i>');
+                    if (currentAudio) {
+                        currentAudio.pause();
+                    }
+                }
+
+                // Play this audio
+                audio.play();
+                button.innerHTML = '<i class="fa fa-pause"></i>';
+                currentStation = $(button).parent();
+            } else {
+                audio.pause();
+                button.innerHTML = '<i class="fa fa-play"></i>';
+                currentStation = null;
+            }
+        }
+
+        // Function to play next station
+        function nextStation() {
+            const nextElement = currentStation.next();
+            if (nextElement.length > 0) {
+                nextElement.find('button').trigger('click');
+            }
+        }
+
+        // Function to play previous station
+        function prevStation() {
+            const prevElement = currentStation.prev();
+            if (prevElement.length > 0) {
+                prevElement.find('button').trigger('click');
+            }
+        }
+
+    </script>
+</body>
+
+</html>

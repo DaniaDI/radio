@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Radio Stations</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <h1>Radio Stations</h1>
+    <ul id="radioList"></ul>
+
+    <script>
+        // Set up API endpoint
+        const url = 'https://de1.api.radio-browser.info/json/stations';
+
+        // Keep track of currently playing audio
+        let currentAudio = null;
+
+        // Make API request
+        $.getJSON(url, function (data) {
+            // Loop through results and add to list
+            $.each(data, function (key, station) {
+                $('#radioList').append(`<li>${station.name} - <button onclick="togglePlay(this, '${station.url}')"><i class="fa fa-play"></i></button></li>`);
+            });
+        });
+
+        // Function to toggle play/pause and change icon
+        function togglePlay(button, url) {
+            // Get audio element for this URL or create a new one
+            let audio = currentAudio;
+            if (!audio || audio.src !== url) {
+                audio = new Audio(url);
+                currentAudio = audio;
+            }
+
+            // Toggle play/pause
+            if (audio.paused) {
+                audio.play();
+                button.innerHTML = '<i class="fa fa-pause"></i>';
+            } else {
+                audio.pause();
+                button.innerHTML = '<i class="fa fa-play"></i>';
+            }
+        }
+    </script>
+
+    <!-- Include Font Awesome library for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</body>
+
+</html>
